@@ -89,7 +89,7 @@ html .ui-button.ui-state-disabled:active {
     color: unset !important;
 }
 .card-header {
-    font-size: 50px;
+/*     font-size: 50px; */
 /*     background-color: #e9ecef;
     color: black; */
 } 
