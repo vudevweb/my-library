@@ -44,6 +44,7 @@
             });
         });
     };
+
     TGNT.cartCount = () => {
         let url = "/gio-hang/count";
         $.ajax({
@@ -55,7 +56,7 @@
             success: function (data) {
                 $(".cart_count").html(data);
                 if (data == 0) {
-                    $(".cart-container").html(`
+                    $(".cart-client").html(`
                         <div class="container cart-no-item text-center pt-15">
                                 <img src="/uploads/image/system/no_product.webp"
                                     alt="" width="100">
@@ -199,10 +200,7 @@
         });
     };
     TGNT.updateTotalItem = (idCart, quantity, price) => {
-        console.log(price);
         const total_price = price * quantity;
-        console.log(total_price);
-
         $(`#price-total-${idCart}`).html(TGNT.formatNumber(total_price));
         $(`.price-total`).val(total_price);
     };
@@ -215,10 +213,31 @@
             type: "POST",
             url: url,
             success: function (data) {
-                $("#cart-total").html(TGNT.formatNumber(data));
-                $("#cart-total-input").val(data);
-                $("#cart-total-discount").html(TGNT.formatNumber(data));
-                $("#cart-total-discount-input").val(data);
+                console.log(data);
+                if (data.totalCart == data.afterDiscount) {
+                    $("#save-price").html(``);
+                    $(".cart-discount-collection").html(
+                        `<p class="text m-0">Không có giảm giá</p>`
+                    );
+                } else {
+                    $(".cart-discount-collection").html(``);
+                    data.nameCollection.forEach((name, index) => {
+                        $(".cart-discount-collection").append(`
+                            <p class="row-1">${index + 1}. ${name}</p>
+                        `);
+                    });
+                    $("#save-price").html(
+                        TGNT.formatNumber(data.totalCart - data.afterDiscount)
+                    );
+                }
+                $("#cart-total").html(TGNT.formatNumber(data.totalCart));
+                $("#cart-total-input").val(data.totalCart);
+                $("#cart-total-discount-collection").html(
+                    TGNT.formatNumber(data.afterDiscount)
+                );
+                $("#cart-total-discount-collection-input").val(
+                    data.afterDiscount
+                );
             },
             error: function () {
                 console.log("lỗi");
@@ -269,6 +288,7 @@
             });
         });
     };
+
     $("#slide-featured").slick({
         infinite: true,
         slidesToShow: 4,
@@ -276,6 +296,7 @@
     });
     $(document).ready(function () {
         // TGNT.loadCart();
+        TGNT.cartCount();
         TGNT.removeCart();
         TGNT.showVariant();
         TGNT.updateTotalByQuantity();

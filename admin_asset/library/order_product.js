@@ -268,6 +268,11 @@
     };
 
     TGNT.calculateTotalAmount = () => {
+        if(array.idArray.length == 0) {
+            $('.submit-form').attr("disabled", true);
+        }else{
+            $('.submit-form').attr("disabled", false);
+        }
         let totalAmount = 0;
         $("#product-table-body .total-price").each(function () {
             let priceText = $(this)

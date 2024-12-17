@@ -5,20 +5,22 @@
     let limit = 5;
     TGNT.render = () => {
         let collection_slug = $(".collection_tgnt").data("slug");
-        $.ajax({
-            url: `/bo-suu-tap/ajax/get-comments/${collection_slug}`,
-            type: "GET",
-            data: {
-                collection_slug: collection_slug,
-                limit: limit,
-            },
-            success: function (res) {
-                $(".comment-collection").html(res);
-            },
-            error: function (err) {
-                console.log(err);
-            },
-        });
+        if (collection_slug) {
+            $.ajax({
+                url: `/bo-suu-tap/ajax/get-comments/${collection_slug}`,
+                type: "GET",
+                data: {
+                    collection_slug: collection_slug,
+                    limit: limit,
+                },
+                success: function (res) {
+                    $(".comment-collection").html(res);
+                },
+                error: function (err) {
+                    console.log(err);
+                },
+            });
+        }
     };
     TGNT.loadComments = () => {
         $(document).on("click", ".load-more-comments", function () {
@@ -83,9 +85,13 @@
                 url: "/bo-suu-tap/ajax/comment/store",
                 data: dataObject,
                 success: function (response) {
-                    $(".comment-content").val("");
-                    VDmessage.show("success", "Bình luận thành công");
-                    TGNT.render();
+                    if (response != false) {
+                        $(".comment-content").val("");
+                        VDmessage.show("success", "Bình luận thành công");
+                        TGNT.render();
+                    } else {
+                        VDmessage.show("error", "Chứa từ không hợp lệ");
+                    }
                 },
                 error: function (error) {
                     console.error("Error:", error);
@@ -189,13 +195,17 @@
                 url: "/bo-suu-tap/ajax/comment/store",
                 data: dataObject,
                 success: function (response) {
-                    VDmessage.show("success", "Phản hồi thành công");
-                    if (status == "parent") {
-                        TGNT.render();
+                    if (response != false) {
+                        VDmessage.show("success", "Phản hồi thành công");
+                        if (status == "parent") {
+                            TGNT.render();
+                        } else {
+                            TGNT.loadCommentReply(parent_id, 5);
+                        }
+                        $(`#form-reply-${id}`).remove();
                     } else {
-                        TGNT.loadCommentReply(parent_id, 5);
+                        VDmessage.show("error", "Chứa từ không hợp lệ");
                     }
-                    $(`#form-reply-${id}`).remove();
                 },
                 error: function (error) {
                     console.error("Error:", error);
@@ -241,6 +251,7 @@
     TGNT.removeComment = () => {
         $(document).on("click", ".remove-comment", function () {
             let id = $(this).data("id");
+            let status = $(this).data("status");
             $.ajax({
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
@@ -249,12 +260,17 @@
                 },
                 type: "POST",
                 url: `/bo-suu-tap/ajax/comment/remove`,
-                data:{
+                data: {
                     id: id,
                 },
                 success: function (response) {
                     VDmessage.show("success", "Xoá thành công");
                     $(`#comment-item-${id}`).remove();
+                    if (status == "parent") {
+                        TGNT.render();
+                    } else {
+                        TGNT.loadCommentReply(parent_id, 5);
+                    }
                 },
                 error: function (error) {
                     console.error("Error:", error);
